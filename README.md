@@ -1,4 +1,8 @@
+<p align="center"><img src="Assets/AppIcon-256.png" width="128" height="128" alt="Glasshouse Tray icon"></p>
+
 # Glasshouse Tray
+
+[![CI](https://github.com/alex-red/mac-lg-glasshouse-tray-app/actions/workflows/ci.yml/badge.svg)](https://github.com/alex-red/mac-lg-glasshouse-tray-app/actions/workflows/ci.yml)
 
 A small, native macOS menu bar app for LG webOS TVs running
 [Glasshouse](https://github.com/rorygallagher2024/glasshouse).
@@ -36,9 +40,22 @@ It's built to stay out of the way:
   default on port 8080). Glasshouse needs a rooted TV with the Homebrew
   Channel; see its docs.
 
-## Build
+## Install
 
-Requires Xcode (or the Swift 6 toolchain).
+1. Download the latest `GlasshouseTray-x.y.z.zip` from
+   [Releases](https://github.com/alex-red/mac-lg-glasshouse-tray-app/releases).
+2. Unzip it.
+3. Move `GlasshouseTray.app` to `/Applications`.
+
+Release builds aren't notarized yet, so macOS blocks the first launch. To
+allow it, either:
+- open the app once, then go to System Settings › Privacy & Security and
+  click **Open Anyway**, or
+- run `xattr -dr com.apple.quarantine /Applications/GlasshouseTray.app`.
+
+## Build from source
+
+Requires Xcode 16 or later (Swift 6).
 
 ```sh
 make app       # builds build/GlasshouseTray.app
@@ -71,6 +88,30 @@ By default, any HDMI or DisplayPort output whose name contains "LG" counts as
 the TV. If yours is named differently:
 1. Select it as the output.
 2. Choose **Use "…" as the TV** from the menu.
+
+## Releasing
+
+Push a version tag to publish a GitHub release:
+
+```sh
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+The [release workflow](.github/workflows/release.yml) then:
+1. builds the app with that version,
+2. zips it,
+3. attaches the zip and its SHA-256 to the release.
+
+Builds are signed ad hoc until these repository secrets are added. With them
+in place, the workflow signs with Developer ID and notarizes automatically.
+
+| Secret | Value |
+| --- | --- |
+| `MACOS_CERTIFICATE_P12` | Developer ID Application certificate + key, exported as .p12, base64-encoded |
+| `MACOS_CERTIFICATE_PASSWORD` | Password of that .p12 |
+| `APPLE_ID` | Apple ID email used for notarization |
+| `APPLE_TEAM_ID` | Developer team ID |
+| `APPLE_APP_PASSWORD` | App-specific password for that Apple ID |
 
 ## How it works
 
