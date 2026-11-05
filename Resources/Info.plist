@@ -4,15 +4,17 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Glasshouse Tray</string>
 	<key>CFBundleExecutable</key>
 	<string>GlasshouseTray</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.github.alex-red.GlasshouseTray</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Glasshouse Tray</string>
-	<key>CFBundleDisplayName</key>
 	<string>Glasshouse Tray</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
@@ -24,14 +26,14 @@
 	<string>14.0</string>
 	<key>LSUIElement</key>
 	<true/>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2026 Alex Red. MIT License.</string>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Glasshouse Tray talks to the Glasshouse server on your LG TV over the local network.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 Alex Red. MIT License.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Glasshouse Tray talks to the Glasshouse server on your LG TV over the local network.</string>
 </dict>
 </plist>
