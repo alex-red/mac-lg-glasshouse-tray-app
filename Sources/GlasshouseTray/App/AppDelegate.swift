@@ -8,20 +8,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let keyTap = MediaKeyTap()
     private let volume = VolumeController()
     private let hud = VolumeHUD()
+    private lazy var menuController = MenuController(volume: volume, audioRoute: audioRoute)
     private var tvName = "TV"
     private var permissionPoll: Timer?
     private var promptedForPermission = false
+    private var lastToken: String?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = NSImage(systemSymbolName: "tv", accessibilityDescription: "Glasshouse Tray")
         statusItem.button?.image?.isTemplate = true
 
-        let menu = NSMenu()
-        menu.addItem(withTitle: "Quit Glasshouse Tray", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        statusItem.menu = menu
+        statusItem.menu = menuController.menu
 
-        volume.client = settings.makeClient()
+        menuController.onStats = { [weak self] stats in self?.absorb(stats) }
+        menuController.onReachabilityChange = { [weak self] reachable in
+            self?.statusItem.button?.appearsDisabled = !reachable
+        }
+        menuController.onError = { [weak self] error in
+            self?.hud.show(message: error.localizedDescription)
+        }
+
+        lastToken = settings.token
+        let client = settings.makeClient()
+        volume.client = client
+        menuController.client = client
         volume.onDisplay = { [weak self] level, muted in
             guard let self else { return }
             self.hud.show(level: level, muted: muted, name: self.tvName)
@@ -41,8 +52,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateKeyTap()
     }
 
+    private func absorb(_ stats: Stats) {
+        volume.sync(with: stats)
+        if let name = stats.device?.name { tvName = name }
+        if let mac = stats.mac, mac != settings.tvMAC { settings.tvMAC = mac }
+    }
+
     private func settingsChanged() {
-        volume.client = settings.makeClient()
+        let client = settings.makeClient()
+        if client?.baseURL != volume.client?.baseURL || settings.token != lastToken {
+            lastToken = settings.token
+            volume.client = client
+            menuController.client = client
+        }
         audioRoute.refresh()
         updateKeyTap()
     }
