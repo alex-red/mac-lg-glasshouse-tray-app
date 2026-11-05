@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuController.onError = { [weak self] error in
             self?.hud.show(message: error.localizedDescription)
         }
+        menuController.onOpenSettings = { SettingsPanel.present() }
 
         lastToken = settings.token
         let client = settings.makeClient()
