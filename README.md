@@ -1,4 +1,4 @@
-<p align="center"><img src="Assets/AppIcon-256.png" width="128" height="128" alt="Glasshouse Tray icon"></p>
+<p align="center"><img src="assets/AppIcon-256.png" width="128" height="128" alt="Glasshouse Tray icon"></p>
 
 # Glasshouse Tray
 
@@ -11,6 +11,11 @@ When the TV is your Mac's audio output over HDMI, macOS can't change its
 volume: the volume keys just show a "no entry" sign. Glasshouse Tray picks up
 those keys and sets the TV's volume instead, with its own on-screen level
 display. The menu also covers the everyday controls.
+
+<p align="center">
+  <img src="assets/screenshots/menu-input.png" width="420" alt="The Glasshouse Tray menu, with the Input submenu open">
+  <img src="assets/screenshots/settings.png" width="351" alt="The Settings panel">
+</p>
 
 ## Features
 

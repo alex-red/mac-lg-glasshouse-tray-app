@@ -1,9 +1,9 @@
 #!/bin/sh
-# Regenerates Resources/AppIcon.icns from the 1024px master in Assets/.
+# Regenerates Resources/AppIcon.icns from the 1024px master in assets/.
 set -eu
 cd "$(dirname "$0")/.."
 
-src=Assets/AppIcon.png
+src=assets/AppIcon.png
 set_dir=$(mktemp -d)/AppIcon.iconset
 mkdir -p "$set_dir"
 
