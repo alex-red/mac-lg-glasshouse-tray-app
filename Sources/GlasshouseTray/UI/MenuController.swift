@@ -10,7 +10,13 @@ final class MenuController: NSObject, NSMenuDelegate {
     let menu = NSMenu()
 
     var client: GlasshouseClient? {
-        didSet { stats = nil; reachable = false; refresh() }
+        didSet {
+            generation += 1
+            refreshing = false
+            stats = nil
+            reachable = false
+            refresh()
+        }
     }
 
     var onStats: ((Stats) -> Void)?
@@ -28,6 +34,8 @@ final class MenuController: NSObject, NSMenuDelegate {
     }
     private var isOpen = false
     private var refreshing = false
+    /// Bumped when the client changes, so a reply from the old TV is dropped.
+    private var generation = 0
     private var pollTimer: Timer?
     private var builtStructure = ""
 
@@ -74,14 +82,16 @@ final class MenuController: NSObject, NSMenuDelegate {
     func refresh() {
         guard let client, !refreshing else { return }
         refreshing = true
+        let expected = generation
         Task {
-            defer { refreshing = false }
-            do {
-                let stats = try await client.stats()
+            let stats = try? await client.stats()
+            guard expected == generation else { return }
+            refreshing = false
+            if let stats {
                 self.stats = stats
                 reachable = true
                 onStats?(stats)
-            } catch {
+            } else {
                 reachable = false
             }
             guard isOpen else { return }
