@@ -51,6 +51,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         updateKeyTap()
+
+        // First run: ask for the TV's address once launching has finished.
+        if settings.host.isEmpty {
+            Task { SettingsPanel.present() }
+        }
     }
 
     private func absorb(_ stats: Stats) {
@@ -73,7 +78,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The tap only runs while the TV is the output, so the volume keys keep
     /// working normally for every other device.
     private func updateKeyTap() {
-        let wanted = settings.volumeKeysEnabled && audioRoute.isTV
+        let wanted = settings.volumeKeysEnabled && audioRoute.isTV && volume.client != nil
         guard wanted else {
             keyTap.isEnabled = false
             return

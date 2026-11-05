@@ -9,7 +9,7 @@ final class Settings {
     private let defaults = UserDefaults.standard
 
     var host: String {
-        get { defaults.string(forKey: "host") ?? "192.168.11.211" }
+        get { defaults.string(forKey: "host") ?? "" }
         set { defaults.set(newValue, forKey: "host"); changed() }
     }
 
