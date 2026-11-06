@@ -14,6 +14,9 @@ jobs:
       # Signing and notarization run only once these secrets exist; until
       # then the release is signed ad hoc.
       HAS_SIGNING: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+      # A token that can push to alex-red/homebrew-tap; without it the cask
+      # isn't bumped.
+      HAS_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -71,3 +74,20 @@ jobs:
             "build/GlasshouseTray-$VERSION.zip.sha256" \
             --title "Glasshouse Tray $VERSION" \
             --generate-notes
+
+      - name: Update Homebrew cask
+        if: env.HAS_TAP_TOKEN == 'true'
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          sha256="$(cut -d' ' -f1 "build/GlasshouseTray-$VERSION.zip.sha256")"
+          git clone --depth 1 "https://x-access-token:$TAP_TOKEN@github.com/alex-red/homebrew-tap.git" "$RUNNER_TEMP/tap"
+          cd "$RUNNER_TEMP/tap"
+          sed -i '' -E \
+            -e "s/^  version \".*\"/  version \"$VERSION\"/" \
+            -e "s/^  sha256 \".*\"/  sha256 \"$sha256\"/" \
+            Casks/glasshouse-tray.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "glasshouse-tray $VERSION"
+          git push

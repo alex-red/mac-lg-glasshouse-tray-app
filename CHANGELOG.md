@@ -6,9 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 - The tray menu shows whether Accessibility access is working for the volume
   keys, with a shortcut to the setting and a Restart item when it isn't.
+- Install with Homebrew: `brew install --cask alex-red/tap/glasshouse-tray`.
 
 ### Fixed
 - The volume keys go back to controlling the TV after the Mac sleeps or the
@@ -30,5 +33,6 @@ All notable changes to this project are documented here. The format follows
 - App icon.
 - GitHub Actions for CI builds and tagged releases.
 
-[Unreleased]: https://github.com/alex-red/mac-lg-glasshouse-tray-app/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/alex-red/mac-lg-glasshouse-tray-app/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/alex-red/mac-lg-glasshouse-tray-app/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/alex-red/mac-lg-glasshouse-tray-app/releases/tag/v0.1.0

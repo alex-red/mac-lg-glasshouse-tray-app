@@ -47,13 +47,21 @@ It's built to stay out of the way:
 
 ## Install
 
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask alex-red/tap/glasshouse-tray
+```
+
+Or by hand:
+
 1. Download the latest `GlasshouseTray-x.y.z.zip` from
    [Releases](https://github.com/alex-red/mac-lg-glasshouse-tray-app/releases).
 2. Unzip it.
 3. Move `GlasshouseTray.app` to `/Applications`.
 
-Release builds aren't notarized yet, so macOS blocks the first launch. To
-allow it, either:
+Release builds aren't notarized yet, so macOS blocks the first launch of a
+downloaded copy (Homebrew clears this for you). To allow it, either:
 - open the app once, then go to System Settings › Privacy & Security and
   click **Open Anyway**, or
 - run `xattr -dr com.apple.quarantine /Applications/GlasshouseTray.app`.
