@@ -50,6 +50,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             MainActor.assumeIsolated { self?.settingsChanged() }
         }
 
+        // After sleep, display sleep or a session switch the tap may have been
+        // disabled and the TV's audio device may have dropped out and returned.
+        let workspace = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification,
+                     NSWorkspace.sessionDidBecomeActiveNotification] {
+            workspace.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.resumed() }
+            }
+        }
+
         updateKeyTap()
 
         // First run: ask for the TV's address once launching has finished.
@@ -75,6 +85,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateKeyTap()
     }
 
+    private func resumed() {
+        audioRoute.refreshSettling()
+        updateKeyTap()
+    }
+
     /// The tap only runs while the TV is the output, so the volume keys keep
     /// working normally for every other device.
     private func updateKeyTap() {
@@ -93,6 +108,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         keyTap.isEnabled = true
+        keyTap.revalidate()
     }
 
     /// Accessibility has no change notification; check every few seconds

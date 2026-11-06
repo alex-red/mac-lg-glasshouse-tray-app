@@ -22,20 +22,40 @@ final class AudioRoute {
     var onChange: (() -> Void)?
 
     private var listener: AudioObjectPropertyListenerBlock?
-    private var address = AudioObjectPropertyAddress(
-        mSelector: kAudioHardwarePropertyDefaultOutputDevice,
-        mScope: kAudioObjectPropertyScopeGlobal,
-        mElement: kAudioObjectPropertyElementMain
-    )
+    private var settleWork: DispatchWorkItem?
+    // The default device, plus the device list: a display's HDMI device can
+    // become the default before its name and transport are readable, and
+    // only the device list changes again once they are.
+    private var addresses = [kAudioHardwarePropertyDefaultOutputDevice, kAudioHardwarePropertyDevices].map {
+        AudioObjectPropertyAddress(
+            mSelector: $0,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+    }
 
     func start() {
         guard listener == nil else { return }
         let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
-            MainActor.assumeIsolated { self?.refresh() }
+            MainActor.assumeIsolated { self?.refreshSettling() }
         }
         listener = block
-        AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &address, .main, block)
+        for i in addresses.indices {
+            AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &addresses[i], .main, block)
+        }
         refresh()
+    }
+
+    /// Refreshes now and again shortly after, for devices that are still
+    /// coming up (after wake, or when the display turns back on).
+    func refreshSettling() {
+        refresh()
+        settleWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated { self?.refresh() }
+        }
+        settleWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
     }
 
     func refresh() {

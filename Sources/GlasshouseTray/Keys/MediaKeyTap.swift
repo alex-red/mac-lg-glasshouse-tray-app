@@ -36,6 +36,15 @@ final class MediaKeyTap {
 
     var isInstalled: Bool { tap != nil }
 
+    /// Sleep, display sleep and session switches can leave the tap disabled
+    /// or its port invalidated without a callback. Bring it back if so.
+    func revalidate() {
+        guard isEnabled else { return }
+        if let tap, !CFMachPortIsValid(tap) { uninstall() }
+        if tap == nil { install() }
+        if let tap, !CGEvent.tapIsEnabled(tap: tap) { CGEvent.tapEnable(tap: tap, enable: true) }
+    }
+
     static var hasPermission: Bool { AXIsProcessTrusted() }
 
     /// Shows the system prompt that points to Privacy & Security › Accessibility.
@@ -62,6 +71,13 @@ final class MediaKeyTap {
         self.tap = tap
         self.source = source
         return true
+    }
+
+    private func uninstall() {
+        if let source { CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes) }
+        if let tap { CFMachPortInvalidate(tap) }
+        tap = nil
+        source = nil
     }
 
     // MARK: - Event handling

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- The volume keys go back to controlling the TV after the Mac sleeps or the
+  display turns off, instead of falling back to the Mac's own volume.
+
 ## [0.1.0]
 
 ### Added
