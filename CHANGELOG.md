@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- The tray menu shows whether Accessibility access is working for the volume
+  keys, with a shortcut to the setting and a Restart item when it isn't.
+
 ### Fixed
 - The volume keys go back to controlling the TV after the Mac sleeps or the
   display turns off, instead of falling back to the Mac's own volume.

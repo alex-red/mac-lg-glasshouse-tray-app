@@ -36,6 +36,12 @@ final class MediaKeyTap {
 
     var isInstalled: Bool { tap != nil }
 
+    /// Installed, valid and switched on: volume keys are actually being caught.
+    var isActive: Bool {
+        guard let tap else { return false }
+        return CFMachPortIsValid(tap) && CGEvent.tapIsEnabled(tap: tap)
+    }
+
     /// Sleep, display sleep and session switches can leave the tap disabled
     /// or its port invalidated without a callback. Bring it back if so.
     func revalidate() {

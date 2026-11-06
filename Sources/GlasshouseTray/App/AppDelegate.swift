@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let keyTap = MediaKeyTap()
     private let volume = VolumeController()
     private let hud = VolumeHUD()
-    private lazy var menuController = MenuController(volume: volume, audioRoute: audioRoute)
+    private lazy var menuController = MenuController(volume: volume, audioRoute: audioRoute, keyTap: keyTap)
     private var tvName = "TV"
     private var permissionPoll: Timer?
     private var promptedForPermission = false

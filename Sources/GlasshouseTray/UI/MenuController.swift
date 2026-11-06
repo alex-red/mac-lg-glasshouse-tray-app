@@ -26,6 +26,7 @@ final class MenuController: NSObject, NSMenuDelegate {
 
     private let volume: VolumeController
     private let audioRoute: AudioRoute
+    private let keyTap: MediaKeyTap
     private let settings = Settings.shared
 
     private(set) var stats: Stats?
@@ -47,9 +48,10 @@ final class MenuController: NSObject, NSMenuDelegate {
     private var soundMenu: NSMenu?
     private var pictureMenu: NSMenu?
 
-    init(volume: VolumeController, audioRoute: AudioRoute) {
+    init(volume: VolumeController, audioRoute: AudioRoute, keyTap: MediaKeyTap) {
         self.volume = volume
         self.audioRoute = audioRoute
+        self.keyTap = keyTap
         super.init()
         menu.delegate = self
         menu.autoenablesItems = false
@@ -236,11 +238,58 @@ final class MenuController: NSObject, NSMenuDelegate {
             menu.addItem(reset)
         }
 
-        if settings.volumeKeysEnabled, !MediaKeyTap.hasPermission {
-            let grant = item("Allow Accessibility Access…", symbol: "lock.shield", action: #selector(openAccessibilitySettings))
-            grant.indentationLevel = 1
-            menu.addItem(grant)
+        if settings.volumeKeysEnabled {
+            buildPermissionHealth()
         }
+    }
+
+    /// Whether the volume keys can actually be caught. A rebuilt or moved app
+    /// can show as allowed in System Settings while macOS still refuses it, so
+    /// a tap that should be running but isn't counts as a failure too.
+    private func buildPermissionHealth() {
+        let problem: String?
+        if !MediaKeyTap.hasPermission {
+            problem = "Accessibility access not granted"
+        } else if keyTap.isEnabled, !keyTap.isActive {
+            problem = "Volume keys not being caught"
+        } else {
+            problem = nil
+        }
+
+        guard let problem else {
+            let ok = NSMenuItem(title: "Accessibility access granted", action: nil, keyEquivalent: "")
+            ok.image = NSImage(systemSymbolName: "checkmark.shield", accessibilityDescription: nil)
+            ok.isEnabled = false
+            ok.indentationLevel = 1
+            menu.addItem(ok)
+            return
+        }
+
+        let status = NSMenuItem(title: problem, action: nil, keyEquivalent: "")
+        status.image = NSImage(systemSymbolName: "exclamationmark.shield", accessibilityDescription: nil)
+        status.isEnabled = false
+        status.indentationLevel = 1
+        menu.addItem(status)
+
+        let grant = item("Open Accessibility Settings…", symbol: "lock.shield", action: #selector(openAccessibilitySettings))
+        grant.indentationLevel = 1
+        menu.addItem(grant)
+
+        let note = NSMenuItem()
+        note.attributedTitle = NSAttributedString(
+            string: "You may need to remove it first,\nthen restart the app, then enable.",
+            attributes: [
+                .font: NSFont.menuFont(ofSize: NSFont.smallSystemFontSize),
+                .foregroundColor: NSColor.secondaryLabelColor,
+            ]
+        )
+        note.isEnabled = false
+        note.indentationLevel = 1
+        menu.addItem(note)
+
+        let restart = item("Restart Glasshouse Tray", symbol: "arrow.clockwise", action: #selector(restartApp))
+        restart.indentationLevel = 1
+        menu.addItem(restart)
     }
 
     /// Refreshes the values of existing items without rebuilding.
@@ -345,6 +394,17 @@ final class MenuController: NSObject, NSMenuDelegate {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
+    }
+
+    /// Accessibility changes for a running process often only take effect
+    /// after a relaunch.
+    @objc private func restartApp() {
+        let path = Bundle.main.bundlePath
+        let relaunch = Process()
+        relaunch.executableURL = URL(fileURLWithPath: "/bin/sh")
+        relaunch.arguments = ["-c", "sleep 1; /usr/bin/open \"$0\"", path]
+        try? relaunch.run()
+        NSApp.terminate(nil)
     }
 
     @objc private func openDashboard() {
